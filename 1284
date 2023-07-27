@@ -1,0 +1,69 @@
+### LOJ-1284 - Lights inside 3D Grid
+
+### Summary:
+
+You are given a 3D grid, which has dimensions **X**, **Y** and **Z**.Each of the **X x Y x Z** cells contains a light. Initially all lights are off. You will have **K** turns. After each operation, two points are selected on the grid, and the state of the lights between these two points will be reversed.  The question is: What is the expected number of lit lights after k operations
+
+### Hints:
+
+Consider the probability of a single light's state change.
+
+### Solution:
+
+* Set the coordinate on the 3D grid to $(i,j,k)$,Now consider the probability that point$(i_{now},j_{now},k_{now})$  lights up,take the horizontal coordinate as an example,if you take two points, the abscissa is $x_i$and$x_j$,only when $x_i<=x_{now}<=x_{j}$ is present will it be flipped，so $p_x=1- \frac{(X-x_{now})^2+(x_{now}-1)^2}{x^2}$,When x, y, and z all satisfy the condition, the state of the light is reversed，then $p=p_xp_yp_z$
+
+* If a light is lit after K operations, then it must have been toggled an odd number of times, meaning the probability of a light being lit after k operations is$C_k^1p^1(1−p)^{k−1}+C_k^3p^3(1−p)^{k−3}+⋯+C_k^ip^i(1−p)^{k−i}+⋯$($i<=k$ and $i%2==1$)
+
+* According to the binomial expansion:
+
+  $(a+b)^n=C_n^1ab^{n-1}+C_n^2a^2b^{n-2}+C_n^3a^3b^{n-3}+…$                                          ①
+
+  $(-a+b)^n=C_n^1(-a)b^{n-1}+C_n^2(-a)^2b^{n-2}+C_n^3(-a)^3b^{n-3}+…$                  ②
+
+  $\frac{①-②}{2}=\frac{(a+b)^n-(-a+b)^n}{2}=C_n^1a^1b^{n−1}+C_n^3a^3b^{k−3}+⋯+C_k^ip^i(1−p)^{k−i}+⋯$
+
+  令$s=p,b=1-p$
+
+  $\frac{1-(1-2p)^k}{2}=C_k^1p^1(1−p)^{k−1}+C_k^3p^3(1−p)^{k−3}+⋯+C_k^ip^i(1−p)^{k−i}+⋯$
+
+  the expectations of each light being lit is $\frac{1-(1-2p)^k}{2}$
+
+* The sum of the expectations of each light being lit is the answer.
+
+### Code:
+
+### C++
+
+-----
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+double f(int i, int x) {
+    return (1.0 - (1.0 * (x - i) * (x - i) + 1.0 * (i - 1) * (i - 1)) / (1.0 * x * x));
+}
+double solve() {
+    int x, y, z, K;
+    cin >> x >> y >> z >> K;
+    double ans = 0;
+    for (int i = 1; i <= x; i++) {
+        for (int j = 1; j <= y; j++) {
+            for (int k = 1; k <= z; k++) {
+                double p = f(i, x) * f(j, y) * f(k, z);
+                ans += (1.0 - pow(1 - 2 * p, K)) / 2.0;
+            }
+        }
+    }
+    return ans;
+}
+
+int main() {
+    int T;
+    cin >> T;
+    for (int i = 1; i <= T; i++) {
+        printf("Case %d: %.10f\n", i, solve());
+    }
+    return 0;
+}
+```
